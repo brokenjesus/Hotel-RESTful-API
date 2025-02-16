@@ -3,9 +3,12 @@ package by.lupach.hotel_restful_api.entities;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Embeddable;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Embeddable
 @Data
+@SuperBuilder
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Contact details of the hotel")

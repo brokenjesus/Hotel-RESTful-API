@@ -11,8 +11,9 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Hotel RESTful API")
+                        .title("Hotel API")
                         .version("1.0")
-                        .description("Hotel RESTful API documentation"));
+                        .description("Hotel RESTful API"));
     }
 }
+

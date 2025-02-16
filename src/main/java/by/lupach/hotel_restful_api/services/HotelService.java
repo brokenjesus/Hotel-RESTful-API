@@ -5,7 +5,6 @@ import by.lupach.hotel_restful_api.dto.HotelSummaryDTO;
 import by.lupach.hotel_restful_api.entities.Hotel;
 import by.lupach.hotel_restful_api.repositories.HotelRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -15,14 +14,16 @@ import java.util.stream.Collectors;
 @Service
 public class HotelService {
 
-    @Autowired
-    private HotelRepository hotelRepository;
+    private final HotelRepository hotelRepository;
+
+    public HotelService(HotelRepository hotelRepository) {
+        this.hotelRepository = hotelRepository;
+    }
 
     public List<HotelSummaryDTO> getAllHotelsSummary() {
-        List<Hotel> hotels = hotelRepository.findAll();
-        return hotels.stream()
+        return hotelRepository.findAll().stream()
                 .map(this::convertToSummaryDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public HotelDetailDTO getHotelDetail(Long id) {
