@@ -85,9 +85,9 @@ public class HotelController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) String city,
-            @RequestParam(required = false) String county,
+            @RequestParam(required = false) String country,
             @RequestParam(required = false) String amenities) {
-        return new ResponseEntity<>(hotelService.searchHotels(name, brand, city, county, amenities), HttpStatus.OK);
+        return new ResponseEntity<>(hotelService.searchHotels(name, brand, city, country, amenities), HttpStatus.OK);
     }
 
     @Operation(summary = "Add amenities to a hotel", description = "Adds a list of amenities to the specified hotel")

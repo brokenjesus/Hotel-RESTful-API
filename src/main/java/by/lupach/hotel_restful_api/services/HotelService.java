@@ -49,7 +49,7 @@ public class HotelService {
     }
 
 
-    public List<HotelSummaryDTO> searchHotels(String name, String brand, String city, String county, String amenity) {
+    public List<HotelSummaryDTO> searchHotels(String name, String brand, String city, String country, String amenity) {
         Specification<Hotel> spec = Specification.where(null);
 
         if (name != null && !name.isBlank()) {
@@ -66,10 +66,10 @@ public class HotelService {
                 return null;
             });
         }
-        if (county != null && !county.isBlank()) {
+        if (country != null && !country.isBlank()) {
             spec = spec.and((root, query, cb) -> {
                 if (root.get("address") != null) {
-                    return cb.equal(cb.lower(root.get("address").get("country")), county.toLowerCase());
+                    return cb.equal(cb.lower(root.get("address").get("country")), country.toLowerCase());
                 }
                 return null;
             });
