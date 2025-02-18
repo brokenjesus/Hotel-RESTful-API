@@ -228,7 +228,6 @@ The application will be available on port `8092`, and the base URL for all endpo
         "Meeting rooms"
   
     ]
-      ```
   
 - **Response**: `201 Created`
 
