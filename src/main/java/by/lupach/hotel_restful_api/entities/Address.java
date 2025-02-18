@@ -20,14 +20,14 @@ public class Address {
     @Schema(description = "City", example = "Minsk")
     private String city;
 
-    @Schema(description = "County or region", example = "Belarus")
-    private String county;
+    @Schema(description = "Country", example = "Belarus")
+    private String country;
 
     @Schema(description = "Postal code", example = "220004")
     private String postCode;
 
     @Override
     public String toString() {
-        return houseNumber + " " + street + ", " + city + ", " + postCode + ", " + county;
+        return houseNumber + " " + street + ", " + city + ", " + postCode + ", " + country;
     }
 }

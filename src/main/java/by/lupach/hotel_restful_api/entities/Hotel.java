@@ -40,7 +40,7 @@ public class Hotel {
             @AttributeOverride(name = "houseNumber", column = @Column(name = "house_number")),
             @AttributeOverride(name = "street", column = @Column(name = "street")),
             @AttributeOverride(name = "city", column = @Column(name = "city")),
-            @AttributeOverride(name = "county", column = @Column(name = "county")),
+            @AttributeOverride(name = "country", column = @Column(name = "country")),
             @AttributeOverride(name = "postCode", column = @Column(name = "post_code"))
     })
     @Schema(description = "Address details of the hotel")

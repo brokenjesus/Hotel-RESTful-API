@@ -1,6 +1,5 @@
 package by.lupach.hotel_restful_api;
 
-import by.lupach.hotel_restful_api.controllers.HotelController;
 import by.lupach.hotel_restful_api.dto.HotelDetailDTO;
 import by.lupach.hotel_restful_api.dto.HotelSummaryDTO;
 import by.lupach.hotel_restful_api.entities.Address;
@@ -51,7 +50,7 @@ public class HotelServiceTest {
 
     @Test
     void testGetAllHotelsSummary() {
-        List<Hotel> hotels = Arrays.asList(hotel);
+        List<Hotel> hotels = Collections.singletonList(hotel);
         when(hotelRepository.findAll()).thenReturn(hotels);
 
         List<HotelSummaryDTO> summaries = hotelService.getAllHotelsSummary();
@@ -97,7 +96,7 @@ public class HotelServiceTest {
 
     @Test
     void testSearchHotels() {
-        List<Hotel> hotels = Arrays.asList(hotel);
+        List<Hotel> hotels = Collections.singletonList(hotel);
         when(hotelRepository.findAll(any(Specification.class))).thenReturn(hotels);
 
         List<HotelSummaryDTO> summaries = hotelService.searchHotels("DoubleTree", "Hilton", "Minsk", "Belarus", "Free WiFi");
@@ -164,7 +163,7 @@ public class HotelServiceTest {
     void testAddAmenitiesSuccess() {
         Hotel hotelWithAmenities = Hotel.builder()
                 .id(1L)
-                .amenities(new HashSet<>(Arrays.asList("Free parking")))
+                .amenities(new HashSet<>(List.of("Free parking")))
                 .build();
 
         when(hotelRepository.findById(1L)).thenReturn(Optional.of(hotelWithAmenities));
@@ -186,7 +185,7 @@ public class HotelServiceTest {
     @Test
     void testAddAmenitiesNotFound() {
         when(hotelRepository.findById(99L)).thenReturn(Optional.empty());
-        List<String> amenities = Arrays.asList("Free WiFi");
+        List<String> amenities = List.of("Free WiFi");
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> hotelService.addAmenities(99L, amenities));

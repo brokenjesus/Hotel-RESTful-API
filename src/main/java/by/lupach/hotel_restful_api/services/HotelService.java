@@ -20,6 +20,11 @@ public class HotelService {
         this.hotelRepository = hotelRepository;
     }
 
+    public HotelSummaryDTO createHotel(Hotel hotel) {
+        Hotel savedHotel = hotelRepository.save(hotel);
+        return convertToSummaryDTO(savedHotel);
+    }
+
     public List<HotelSummaryDTO> getAllHotelsSummary() {
         return hotelRepository.findAll().stream()
                 .map(this::convertToSummaryDTO)
@@ -31,6 +36,18 @@ public class HotelService {
                 .map(this::convertToDetailDTO)
                 .orElseThrow(() -> new EntityNotFoundException("Hotel " + id + " not found"));
     }
+
+    public HotelSummaryDTO updateHotel(Hotel hotel) {
+        hotelRepository.findById(hotel.getId()).orElseThrow(() -> new EntityNotFoundException("Hotel not found"));
+        Hotel updatedHotel = hotelRepository.save(hotel);
+        return convertToSummaryDTO(updatedHotel);
+    }
+
+    public void deleteHotel(Long id) {
+        hotelRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Hotel not found"));
+        hotelRepository.deleteById(id);
+    }
+
 
     public List<HotelSummaryDTO> searchHotels(String name, String brand, String city, String county, String amenity) {
         Specification<Hotel> spec = Specification.where(null);
@@ -52,7 +69,7 @@ public class HotelService {
         if (county != null && !county.isBlank()) {
             spec = spec.and((root, query, cb) -> {
                 if (root.get("address") != null) {
-                    return cb.equal(cb.lower(root.get("address").get("county")), county.toLowerCase());
+                    return cb.equal(cb.lower(root.get("address").get("country")), county.toLowerCase());
                 }
                 return null;
             });
@@ -70,7 +87,7 @@ public class HotelService {
         List<Object[]> queryResult = switch (param.toLowerCase()) {
             case "brand" -> hotelRepository.countByBrand();
             case "city" -> hotelRepository.countByCity();
-            case "county" -> hotelRepository.countByCounty();
+            case "country" -> hotelRepository.countByCountry();
             case "amenities" -> hotelRepository.countByAmenities();
             default -> throw new IllegalArgumentException("Invalid histogram parameter: " + param);
         };
@@ -83,11 +100,6 @@ public class HotelService {
         return result;
     }
 
-    public HotelSummaryDTO createHotel(Hotel hotel) {
-        Hotel savedHotel = hotelRepository.save(hotel);
-        return convertToSummaryDTO(savedHotel);
-    }
-
     public void addAmenities(Long id, List<String> amenities) {
         hotelRepository.findById(id)
                 .ifPresentOrElse(hotel -> {
@@ -96,6 +108,17 @@ public class HotelService {
                 }, () -> {
                     throw new EntityNotFoundException("Hotel " + id + " not found");
                 });
+    }
+
+    public void deleteAmenities(Long id, Optional<List<String>> amenities) {
+        Hotel hotel = hotelRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Hotel " + id + " not found"));
+        if (amenities.isEmpty()){
+            hotel.setAmenities(new HashSet<>());
+        }else{
+            amenities.get().forEach(hotel.getAmenities()::remove);
+        }
+        hotelRepository.save(hotel);
     }
 
     private HotelSummaryDTO convertToSummaryDTO(Hotel hotel) {

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/property-view")
@@ -25,6 +26,14 @@ public class HotelController {
 
     public HotelController(HotelService hotelService) {
         this.hotelService = hotelService;
+    }
+
+    @Operation(summary = "Create a new hotel", description = "Adds a new hotel to the system")
+    @ApiResponse(responseCode = "201", description = "Hotel successfully created")
+    @PostMapping("/hotels")
+    public ResponseEntity<HotelSummaryDTO> createHotel(@RequestBody Hotel hotel) {
+        HotelSummaryDTO savedHotel = hotelService.createHotel(hotel);
+        return new ResponseEntity<>(savedHotel, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Get a list of all hotels", description = "Returns brief information about all hotels")
@@ -44,6 +53,31 @@ public class HotelController {
         return new ResponseEntity<>(hotelService.getHotelDetail(id), HttpStatus.OK);
     }
 
+    @Operation(summary = "Update hotel details", description = "Updates the details of an existing hotel by its ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Hotel successfully updated"),
+            @ApiResponse(responseCode = "404", description = "Hotel not found")
+    })
+    @PutMapping("/hotels/{id}")
+    public ResponseEntity<HotelSummaryDTO> updateHotel(
+            @Parameter(description = "Hotel ID") @PathVariable Long id,
+            @RequestBody Hotel hotel) {
+        hotel.setId(id);  // Set the hotel ID from the URL path
+        HotelSummaryDTO updatedHotel = hotelService.updateHotel(hotel);
+        return new ResponseEntity<>(updatedHotel, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Delete a hotel", description = "Deletes a hotel from the system by its ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Hotel successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "Hotel not found")
+    })
+    @DeleteMapping("/hotels/{id}")
+    public ResponseEntity<Void> deleteHotel(@Parameter(description = "Hotel ID") @PathVariable Long id) {
+        hotelService.deleteHotel(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @Operation(summary = "Search hotels", description = "Allows searching for hotels by various parameters")
     @ApiResponse(responseCode = "200", description = "Search results returned")
     @GetMapping("/search")
@@ -54,14 +88,6 @@ public class HotelController {
             @RequestParam(required = false) String county,
             @RequestParam(required = false) String amenities) {
         return new ResponseEntity<>(hotelService.searchHotels(name, brand, city, county, amenities), HttpStatus.OK);
-    }
-
-    @Operation(summary = "Create a new hotel", description = "Adds a new hotel to the system")
-    @ApiResponse(responseCode = "201", description = "Hotel successfully created")
-    @PostMapping("/hotels")
-    public ResponseEntity<HotelSummaryDTO> createHotel(@RequestBody Hotel hotel) {
-        HotelSummaryDTO savedHotel = hotelService.createHotel(hotel);
-        return new ResponseEntity<>(savedHotel, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Add amenities to a hotel", description = "Adds a list of amenities to the specified hotel")
@@ -75,6 +101,19 @@ public class HotelController {
             @RequestBody List<String> amenities) {
         hotelService.addAmenities(id, amenities);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Delete amenities from a hotel", description = "Removes the specified amenities from the hotel")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Amenities successfully removed"),
+            @ApiResponse(responseCode = "404", description = "Hotel not found")
+    })
+    @DeleteMapping("/hotels/{id}/amenities")
+    public ResponseEntity<Void> deleteAmenities(
+            @Parameter(description = "Hotel ID") @PathVariable Long id,
+            @RequestBody Optional<List<String>> amenities) {
+        hotelService.deleteAmenities(id, amenities);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Operation(summary = "Get histogram", description = "Returns a histogram of data for a specified parameter")

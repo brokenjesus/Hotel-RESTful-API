@@ -17,7 +17,7 @@
             <column name="house_number" type="INT"/>
             <column name="street" type="VARCHAR(255)"/>
             <column name="city" type="VARCHAR(255)"/>
-            <column name="county" type="VARCHAR(255)"/>
+            <column name="country" type="VARCHAR(255)"/>
             <column name="post_code" type="VARCHAR(50)"/>
             <!-- Поля контактов -->
             <column name="phone" type="VARCHAR(50)"/>
