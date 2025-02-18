@@ -160,6 +160,73 @@ public class HotelServiceTest {
     }
 
     @Test
+    void testUpdateHotelSuccess() {
+        Hotel updatedHotel = Hotel.builder()
+                .id(hotel.getId())
+                .name("Updated Name")
+                .description("Updated Description")
+                .brand("Updated Brand")
+                .address(hotel.getAddress())
+                .contacts(hotel.getContacts())
+                .arrivalTime(hotel.getArrivalTime())
+                .amenities(hotel.getAmenities())
+                .build();
+
+        when(hotelRepository.findById(hotel.getId())).thenReturn(Optional.of(hotel));
+        when(hotelRepository.save(updatedHotel)).thenReturn(updatedHotel);
+
+        var result = hotelService.updateHotel(updatedHotel);
+
+        assertEquals(updatedHotel.getId(), result.getId());
+        assertEquals("Updated Name", result.getName());
+        assertEquals("Updated Description", result.getDescription());
+        assertEquals("Updated Brand", result.getAddress().contains("Updated")
+                ? "Updated Brand" : updatedHotel.getBrand());
+
+        verify(hotelRepository, times(1)).findById(hotel.getId());
+        verify(hotelRepository, times(1)).save(updatedHotel);
+    }
+
+    @Test
+    void testDeleteHotelSuccess() {
+        when(hotelRepository.findById(hotel.getId())).thenReturn(Optional.of(hotel));
+        doNothing().when(hotelRepository).deleteById(hotel.getId());
+
+        hotelService.deleteHotel(hotel.getId());
+
+        verify(hotelRepository, times(1)).findById(hotel.getId());
+        verify(hotelRepository, times(1)).deleteById(hotel.getId());
+    }
+
+    @Test
+    void testUpdateHotelNotFound() {
+        Hotel updatedHotel = Hotel.builder()
+                .id(999L)
+                .name("Non-existent Hotel")
+                .build();
+
+        when(hotelRepository.findById(999L)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> hotelService.updateHotel(updatedHotel));
+        assertTrue(exception.getMessage().contains("Hotel not found"));
+
+        verify(hotelRepository, times(1)).findById(999L);
+    }
+
+    @Test
+    void testDeleteHotelNotFound() {
+        when(hotelRepository.findById(999L)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> hotelService.deleteHotel(999L));
+        assertTrue(exception.getMessage().contains("Hotel not found"));
+
+        verify(hotelRepository, times(1)).findById(999L);
+    }
+
+
+    @Test
     void testAddAmenitiesSuccess() {
         Hotel hotelWithAmenities = Hotel.builder()
                 .id(1L)
@@ -193,4 +260,50 @@ public class HotelServiceTest {
         assertTrue(exception.getMessage().contains("Hotel 99 not found"));
         verify(hotelRepository, times(1)).findById(99L);
     }
+
+    @Test
+    void testDeleteAmenitiesWithAmenitiesList() {
+        Set<String> initialAmenities = new HashSet<>(Arrays.asList("Free parking", "Free WiFi", "Pool"));
+        hotel.setAmenities(initialAmenities);
+
+        when(hotelRepository.findById(hotel.getId())).thenReturn(Optional.of(hotel));
+
+        hotelService.deleteAmenities(hotel.getId(), Optional.of(List.of("Pool")));
+
+        ArgumentCaptor<Hotel> hotelCaptor = ArgumentCaptor.forClass(Hotel.class);
+        verify(hotelRepository).save(hotelCaptor.capture());
+        Hotel savedHotel = hotelCaptor.getValue();
+
+        assertFalse(savedHotel.getAmenities().contains("Pool"));
+        assertTrue(savedHotel.getAmenities().contains("Free parking"));
+        assertTrue(savedHotel.getAmenities().contains("Free WiFi"));
+    }
+
+    @Test
+    void testDeleteAmenitiesEmptyOptionalRemovesAllAmenities() {
+        Set<String> initialAmenities = new HashSet<>(Arrays.asList("Free parking", "Free WiFi", "Pool"));
+        hotel.setAmenities(initialAmenities);
+
+        when(hotelRepository.findById(hotel.getId())).thenReturn(Optional.of(hotel));
+
+        hotelService.deleteAmenities(hotel.getId(), Optional.empty());
+
+        ArgumentCaptor<Hotel> hotelCaptor = ArgumentCaptor.forClass(Hotel.class);
+        verify(hotelRepository).save(hotelCaptor.capture());
+        Hotel savedHotel = hotelCaptor.getValue();
+
+        assertTrue(savedHotel.getAmenities().isEmpty());
+    }
+
+    @Test
+    void testDeleteAmenitiesHotelNotFound() {
+        when(hotelRepository.findById(999L)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> hotelService.deleteAmenities(999L, Optional.of(List.of("Free parking"))));
+        assertTrue(exception.getMessage().contains("Hotel 999 not found"));
+
+        verify(hotelRepository, times(1)).findById(999L);
+    }
+
 }

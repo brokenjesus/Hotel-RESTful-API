@@ -22,8 +22,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.*;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -203,6 +205,75 @@ public class HotelControllerTest {
 
         verify(hotelService, times(1)).createHotel(hotel);
     }
+
+    @Test
+    void updateHotel() throws Exception {
+        Address hotelAddress = new Address(9, "Pobediteley Avenue", "Minsk", "Belarus", "220004");
+        Contacts hotelContacts = new Contacts("+375 17 309-80-00", "doubletreeminsk.info@hilton.com");
+        ArrivalTime hotelArrivalTime = new ArrivalTime("14:00", "12:00");
+        Set<String> hotelAmenities = new HashSet<>(Set.of(
+                "Free parking",
+                "Free WiFi",
+                "Non-smoking rooms"
+        ));
+
+        Hotel hotel = new Hotel(1L, "Updated Hotel Name", "Updated Description", "Updated Brand", hotelAddress, hotelContacts, hotelArrivalTime, hotelAmenities);
+        String hotelJson = objectMapper.writeValueAsString(hotel);
+
+        HotelSummaryDTO updatedHotelSummary = new HotelSummaryDTO(
+                1L,
+                "Updated Hotel Name",
+                "Updated Description",
+                "Updated Brand",
+                "+375 17 309-80-00"
+        );
+
+        when(hotelService.updateHotel(hotel)).thenReturn(updatedHotelSummary);
+
+        mockMvc.perform(put("/property-view/hotels/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(hotelJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Hotel Name"))
+                .andExpect(jsonPath("$.description").value("Updated Description"));
+
+        verify(hotelService, times(1)).updateHotel(hotel);
+    }
+
+
+    @Test
+    void deleteHotel() throws Exception {
+        Long hotelId = 1L;
+
+        doNothing().when(hotelService).deleteHotel(hotelId);
+
+        mockMvc.perform(delete("/property-view/hotels/{id}", hotelId))
+                .andExpect(status().isNoContent());
+
+        verify(hotelService, times(1)).deleteHotel(hotelId);
+    }
+
+    @Test
+    void deleteAmenities() throws Exception {
+        Long hotelId = 1L;
+        List<String> amenities = List.of(
+                "Free parking",
+                "Free WiFi",
+                "Non-smoking rooms"
+        );
+        String amenitiesJson = objectMapper.writeValueAsString(amenities);
+
+        doNothing().when(hotelService).deleteAmenities(eq(hotelId), any());
+
+        mockMvc.perform(delete("/property-view/hotels/{id}/amenities", hotelId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(amenitiesJson))
+                .andExpect(status().isNoContent());
+
+        verify(hotelService, times(1)).deleteAmenities(eq(hotelId), eq(Optional.of(amenities)));
+    }
+
+
 
     @Test
     void addAmenities() throws Exception {
