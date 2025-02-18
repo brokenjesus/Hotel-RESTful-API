@@ -245,9 +245,7 @@ The application will be available on port `8092`, and the base URL for all endpo
   
         "Minsk": 1,
   
-        "Moscow": 2,
-  
-        "Mogilev": 0
+        "Moscow": 2
   
     }
     ```
@@ -260,9 +258,7 @@ The application will be available on port `8092`, and the base URL for all endpo
   
         "Free WiFi": 20,
   
-        "Non-smoking rooms": 5,
-  
-        "Fitness center": 0
+        "Non-smoking rooms": 5
   
     }
   ```
